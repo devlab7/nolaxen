@@ -1,0 +1,42 @@
+Sub meanHour()
+'
+' Macro1 Macro
+'
+
+'
+
+numColumn = ActiveCell.Column()
+numRow = 2
+firstHour = 3
+
+Do While numRow < 27
+    Cells(numRow, numColumn - 1).NumberFormat = "h:mm"
+    Cells(numRow, numColumn - 1).FormulaR1C1 = firstHour & ":00"
+    Cells(numRow + 1, numColumn - 1).NumberFormat = "h:mm"
+    Cells(numRow + 1, numColumn - 1).FormulaR1C1 = firstHour + 1 & ":00"
+
+    Cells(numRow, numColumn).Select
+    
+    ActiveSheet.Cells(numRow, numColumn).Select
+    
+    startInterval = Cells(numRow, numColumn - 1).Text
+    endInterval = Cells(numRow + 1, numColumn - 1).Text
+
+    
+    ActiveSheet.Range("$A$1:$A$3000").AutoFilter Field:=1, Criteria1:=">=" & startInterval, _
+        Operator:=xlAnd, Criteria2:="<" & endInterval
+        
+    ActiveSheet.AutoFilter.Range.Offset(1).SpecialCells(xlCellTypeVisible).Cells(1, 1).Select
+    firstRow = ActiveCell.Row
+    numberSelectedRows = ActiveSheet.AutoFilter.Range.Columns(1).SpecialCells(xlCellTypeVisible).Count - 1
+    lastRow = firstRow + numberSelectedRows - 1
+
+    'cellFormula.Formula = "=AVERAGE(B" & firstRow & ":B" & lastRow & ")"
+    Cells(numRow, numColumn).Formula = "=AVERAGE(B" & firstRow & ":B" & lastRow & ")"
+
+    ActiveSheet.ShowAllData
+    numRow = numRow + 1
+    firstHour = firstHour + 1
+Loop
+
+End Sub
