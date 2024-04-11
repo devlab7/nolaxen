@@ -1,0 +1,42 @@
+def updateDuration(duration, startStation):
+    #path = project.absolutePath()
+    layer=iface.activeLayer()
+    
+    bahnhoefe = QgsProject.instance().mapLayersByName("Bahnhoefe")[0]
+    listStations = []
+    for feature in bahnhoefe.getFeatures():
+        listStations.append(feature['Name'])
+        
+    auslandBahnhoefe = QgsProject.instance().mapLayersByName("AuslandBahnhoefe")[0]
+    for feature in auslandBahnhoefe.getFeatures():
+        listStations.append(feature['Name'])
+    
+    listId=[]
+    for feature in layer.getFeatures():
+        listId.append(feature['id'])
+        
+    maxValue= max(listId)
+    
+    
+    if startStation in listStations:
+        with edit(layer):
+            selection = layer.selectedFeatures()
+            for feature in selection:
+                if feature['id']==-1:
+                    feature.setAttribute(feature.fieldNameIndex('id'), maxValue+1)
+                    
+                    feature.setAttribute(feature.fieldNameIndex('startSta'), startStation)
+                    layer.updateFeature(feature)
+                else:
+                    print("Tu as déjà fait ce tronçon, bougre d'étourdi!")
+        i=0
+        for feature in layer.selectedFeatures():
+            i+=1
+        
+        if i > 1:
+            print("Tu peux fusionner manuellement les tronçons sélectionnés")
+        
+    else:
+        print(startStation + " n" + "'"+ "existe pas. Vérifie l" + "'"+ "orthographe.")
+        
+    #layer.startEditing()
