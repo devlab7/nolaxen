@@ -1,0 +1,104 @@
+def updateFields(lastStation):
+    
+    import random
+    import math
+    
+    
+    
+    
+    random = random.randint(0, 1000)
+    path=QgsProject.instance().absolutePath()
+    layer=iface.activeLayer()
+    field_names = layer.fields().names()
+    
+    #check if all features have value
+    numberNullValues=0
+    for feature in layer.getFeatures():
+        if (feature['startSta']==''):
+            numberNullValues=1
+    
+    if numberNullValues==1:
+        print("Un tronçon n'a pas de valeur.")
+    else:
+        
+        nameLayer = layer.name()
+        layer = QgsProject.instance().mapLayersByName(nameLayer)[0]
+        print(layer)
+        listOfLayersInTOC=[]
+        for layer in iface.mapCanvas().layers():
+            listOfLayersInTOC.append(layer.name())
+    
+        if "snappedBahnhoefe" not in listOfLayersInTOC:
+            bahnhoefe = QgsVectorLayer(path + '/intermediaryLayers/snappedBahnhoefe.shp', 'snappedBahnhoefe', 'ogr')
+    
+            if not bahnhoefe.isValid():
+                print('bahnhoefe failed to load')
+            else:
+    
+                QgsProject.instance().addMapLayer(bahnhoefe)
+
+        
+        
+        bahnhoefe = QgsProject.instance().mapLayersByName("Bahnhoefe")[0]
+    
+        #create field end station
+    
+        listStations = []
+        for feature in bahnhoefe.getFeatures():
+            listStations.append(feature['Name'])
+        
+        auslandBahnhoefe = QgsProject.instance().mapLayersByName("AuslandBahnhoefe")[0]
+        for feature in auslandBahnhoefe.getFeatures():
+            listStations.append(feature['Name'])
+    
+        layer=QgsProject.instance().mapLayersByName(nameLayer)[0]
+        if lastStation in listStations:
+            listId=[]
+            for feature in layer.getFeatures():
+                listId.append(feature['id'])
+
+            maxId = max(listId)
+    
+            i=0
+            while i < maxId:
+                col='id'
+                value=i+1
+                print(value)
+                layer.selectByExpression(col + "="  +  "'" + str(value) + "'", QgsVectorLayer.SetSelection)
+                selection=layer.selectedFeatures()
+                for feature in selection:
+                    station=feature['startSta']
+                    #○print(station)
+            
+                layer.removeSelection()
+                layer.selectByExpression(col + "="  + "'" + str(i) + "'", QgsVectorLayer.SetSelection)
+                selection=layer.selectedFeatures()
+                with edit(layer):
+                    for feature in selection:
+                        feature.setAttribute(feature.fieldNameIndex('endSta'), station)
+                        layer.updateFeature(feature)
+        
+    
+                layer.removeSelection()
+                i+=1
+
+            col='id'
+            print(i)
+            value=maxId
+            layer.selectByExpression(col + "="  + str(value), QgsVectorLayer.SetSelection)
+            selection=layer.selectedFeatures()
+
+
+            #calculate fields speed, direct speed slope and sinuosity
+
+            _writer = QgsVectorFileWriter.writeAsVectorFormat(layer, path+ '/finalLayers/'+nameLayer+ '.shp', "utf-8", layer.crs(), "ESRI Shapefile", onlySelected=False)
+            layer6=QgsProject.instance().mapLayersByName(nameLayer)[0]
+            QgsProject.instance().removeMapLayer(layer6)
+            finalLayer=QgsVectorLayer(path+ '/finalLayers/'+nameLayer+ '.shp', nameLayer, 'ogr')
+            if not finalLayer.isValid():
+                print(nameLayer + ' failed to load')
+            else:
+                QgsProject.instance().addMapLayer(finalLayer)
+
+        else:
+            print(lastStation + " n" + "'"+ "existe pas. Vérifie l" + "'"+ "orthographe.")
