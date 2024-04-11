@@ -1,1 +1,87 @@
-print("Hello world")
+def exportNewLine(name):
+    path = QgsProject.instance().absolutePath()
+    layer = iface.activeLayer()
+    _writer = QgsVectorFileWriter.writeAsVectorFormat(layer, path+ '/intermediaryLayers/' + name +'.shp', 'UTF-8', layer.crs(), "ESRI Shapefile", onlySelected=True)
+    
+
+        
+    renderer = newLine.renderer()
+    symbol = renderer.symbol()
+    
+
+    symbol = QgsLineSymbol.createSimple({ 'width' : '1'})
+    symbol.setColor(QColor(255,0,255,255))
+    newLine.renderer().setSymbol(symbol)
+    newLine.triggerRepaint()
+    
+    
+    
+    #unclick  schienennetz
+    root = QgsProject.instance().layerTreeRoot()
+    layerRailwayNetwork = QgsProject.instance().mapLayersByName("onlyRailwaySplitedLinesLayer")[0]
+    layerRailwayNetwork = root.findLayer(layerRailwayNetwork.id())
+    layerRailwayNetwork.setItemVisibilityChecked(False)
+    
+    #add stations with name
+    stationsLayer = QgsProject.instance().mapLayersByName("stations")[0]
+    listLayersInTOC = []
+    for layer in iface.mapCanvas().layers():
+        listLayersInTOC.append(layer.name())
+    
+    
+    
+    layer_settings  = QgsPalLayerSettings()
+    text_format = QgsTextFormat()
+
+    text_format.setFont(QFont("Arial", 8))
+    text_format.setSize(12)
+
+    buffer_settings = QgsTextBufferSettings()
+    buffer_settings.setEnabled(True)
+    buffer_settings.setSize(0.8)
+    buffer_settings.setColor(QColor("white"))
+
+    text_format.setBuffer(buffer_settings)
+    layer_settings.setFormat(text_format)
+
+    layer_settings.fieldName = "Name"
+    layer_settings.placement = 2
+
+    layer_settings.enabled = True
+
+    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+    stationsLayer.setLabelsEnabled(True)
+    stationsLayer.setLabeling(layer_settings)
+    stationsLayer.triggerRepaint()
+    
+    
+    #update TOC
+    iface.layerTreeView().refreshLayerSymbology(layer.id())
+
+    
+    #add field id
+    fieldID = QgsField('id', QVariant.Int)
+    newLine.dataProvider().addAttributes([fieldID])
+    newLine.updateFields()
+    
+    #update field id
+    
+    with edit(newLine):
+        for feature in newLine.getFeatures():
+            feature.setAttribute(feature.fieldNameIndex('id'), -1)
+            newLine.updateFeature(feature)
+            newLine.updateFields()
+    
+    #add startStation and arrivalStation
+    
+    fieldStartStation= QgsField('startSta', QVariant.String)
+    newLine.dataProvider().addAttributes([fieldStartStation])
+    newLine.updateFields()
+    
+    fieldEndStation= QgsField('endSta', QVariant.String)
+    newLine.dataProvider().addAttributes([fieldEndStation])
+    newLine.updateFields()
+    
+
+        
+
