@@ -1,87 +1,111 @@
-def exportNewLine(name):
-    path = QgsProject.instance().absolutePath()
-    layer = iface.activeLayer()
-    _writer = QgsVectorFileWriter.writeAsVectorFormat(layer, path+ '/intermediaryLayers/' + name +'.shp', 'UTF-8', layer.crs(), "ESRI Shapefile", onlySelected=True)
-    
 
+Sub Macro2()
+
+    Sheets("Result").Select
+    h = 1
+    While Len(Cells(1, h).Value) > 0
+    
+        h = h + 1
+    Wend
+    lastCol = h - 1
+    
+    
+   formula0 = "=UNIQUE(ASSEMB.V("
+   formulaX = formula0
+    For i = 1 To lastCol - 2
+        formula0 = formula0 & "'" & CStr(Right(Cells(1, i + 2).Value, 2)) & "'!A2:A100000;"
+        formulaX = formulaX & "'" & CStr(Right(Cells(1, i + 2).Value, 2)) & "'!B2:B100000;"
         
-    renderer = newLine.renderer()
-    symbol = renderer.symbol()
-    
-
-    symbol = QgsLineSymbol.createSimple({ 'width' : '1'})
-    symbol.setColor(QColor(255,0,255,255))
-    newLine.renderer().setSymbol(symbol)
-    newLine.triggerRepaint()
-    
-    
-    
-    #unclick  schienennetz
-    root = QgsProject.instance().layerTreeRoot()
-    layerRailwayNetwork = QgsProject.instance().mapLayersByName("onlyRailwaySplitedLinesLayer")[0]
-    layerRailwayNetwork = root.findLayer(layerRailwayNetwork.id())
-    layerRailwayNetwork.setItemVisibilityChecked(False)
-    
-    #add stations with name
-    stationsLayer = QgsProject.instance().mapLayersByName("stations")[0]
-    listLayersInTOC = []
-    for layer in iface.mapCanvas().layers():
-        listLayersInTOC.append(layer.name())
-    
-    
-    
-    layer_settings  = QgsPalLayerSettings()
-    text_format = QgsTextFormat()
-
-    text_format.setFont(QFont("Arial", 8))
-    text_format.setSize(12)
-
-    buffer_settings = QgsTextBufferSettings()
-    buffer_settings.setEnabled(True)
-    buffer_settings.setSize(0.8)
-    buffer_settings.setColor(QColor("white"))
-
-    text_format.setBuffer(buffer_settings)
-    layer_settings.setFormat(text_format)
-
-    layer_settings.fieldName = "Name"
-    layer_settings.placement = 2
-
-    layer_settings.enabled = True
-
-    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-    stationsLayer.setLabelsEnabled(True)
-    stationsLayer.setLabeling(layer_settings)
-    stationsLayer.triggerRepaint()
-    
-    
-    #update TOC
-    iface.layerTreeView().refreshLayerSymbology(layer.id())
-
-    
-    #add field id
-    fieldID = QgsField('id', QVariant.Int)
-    newLine.dataProvider().addAttributes([fieldID])
-    newLine.updateFields()
-    
-    #update field id
-    
-    with edit(newLine):
-        for feature in newLine.getFeatures():
-            feature.setAttribute(feature.fieldNameIndex('id'), -1)
-            newLine.updateFeature(feature)
-            newLine.updateFields()
-    
-    #add startStation and arrivalStation
-    
-    fieldStartStation= QgsField('startSta', QVariant.String)
-    newLine.dataProvider().addAttributes([fieldStartStation])
-    newLine.updateFields()
-    
-    fieldEndStation= QgsField('endSta', QVariant.String)
-    newLine.dataProvider().addAttributes([fieldEndStation])
-    newLine.updateFields()
-    
-
         
+        
+    Next i
+    formula0 = Left(formula0, Len(formula0) - 1)
+    formula0 = formula0 & "))"
+    
+    formulaX = Left(formulaX, Len(formulaX) - 1)
+    formulaX = formulaX & "))"
+    'MsgBox (formula0)
 
+    
+    Cells(2, lastCol + 1).Formula2Local = formula0
+    Cells(2, lastCol + 2).Formula2Local = formulaX
+    
+    
+    
+currentCol = 3
+While currentCol <= lastCol
+    currentYear = CStr(Right(Cells(1, currentCol).Value, 2))
+    currentRowOffre = 2
+    While Len(Cells(currentRowOffre, 5).Value) > 0
+        If Cells(currentRowOffre, 5).Value <> 0 Then
+            offre = Cells(currentRowOffre, 5).Value
+            currentRowTrack = 2
+            While Len(Cells(currentRowTrack, 6).Value) > 0
+                If Cells(currentRowTrack, 6).Value <> 0 Then
+
+                    track = Cells(currentRowTrack, 6).Value
+                    'MsgBox ("offre = " & offre)
+                    'MsgBox ("track = " & track)
+                    Sheets(currentYear).Select
+                    numb = 0
+                    currentRowHop = 2
+                    While Len(Cells(currentRowHop, 2).Value) > 0
+                        If Cells(currentRowHop, 1).Value = offre And Cells(currentRowHop, 2).Value = track Then
+                            numb = numb + Cells(currentRowHop, 3).Value
+                            
+                        End If
+                    
+                        currentRowHop = currentRowHop + 1
+                    Wend
+                
+                
+                
+                End If
+            Sheets("Result").Select
+            trackExist = "no"
+            i = 2
+            While Len(Cells(i, 1).Value) > 0
+                If Cells(i, 1).Value = offre And Cells(i, 2).Value = track Then
+                    trackExist = "yes"
+                    rowTrack = i
+                End If
+                i = i + 1
+            
+            
+            Wend
+            lastRow = i - 1
+            If numb > 0 Then
+                If trackExist = "yes" Then
+                    Cells(rowTrack, currentCol).Value = numb
+                    
+                Else
+                    Cells(lastRow + 1, 1).Value = offre
+                    Cells(lastRow + 1, 2).Value = track
+                
+                    Cells(lastRow + 1, currentCol).Value = numb
+                
+                End If
+            
+            End If
+            
+            
+            currentRowTrack = currentRowTrack + 1
+
+            Wend
+        End If
+        currentRowOffre = currentRowOffre + 1
+    
+    Wend
+    
+
+
+
+
+
+    currentCol = currentCol + 1
+Wend
+    
+    
+    
+    
+End Sub
