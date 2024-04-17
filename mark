@@ -1,111 +1,50 @@
-
 Sub Macro2()
+'
+' Macro2 Macro
+'
 
-    Sheets("Result").Select
-    h = 1
-    While Len(Cells(1, h).Value) > 0
-    
-        h = h + 1
-    Wend
-    lastCol = h - 1
-    
-    
-   formula0 = "=UNIQUE(ASSEMB.V("
-   formulaX = formula0
-    For i = 1 To lastCol - 2
-        formula0 = formula0 & "'" & CStr(Right(Cells(1, i + 2).Value, 2)) & "'!A2:A100000;"
-        formulaX = formulaX & "'" & CStr(Right(Cells(1, i + 2).Value, 2)) & "'!B2:B100000;"
-        
-        
-        
-    Next i
-    formula0 = Left(formula0, Len(formula0) - 1)
-    formula0 = formula0 & "))"
-    
-    formulaX = Left(formulaX, Len(formulaX) - 1)
-    formulaX = formulaX & "))"
-    'MsgBox (formula0)
-
-    
-    Cells(2, lastCol + 1).Formula2Local = formula0
-    Cells(2, lastCol + 2).Formula2Local = formulaX
-    
-    
-    
-currentCol = 3
-While currentCol <= lastCol
-    currentYear = CStr(Right(Cells(1, currentCol).Value, 2))
-    currentRowOffre = 2
-    While Len(Cells(currentRowOffre, 5).Value) > 0
-        If Cells(currentRowOffre, 5).Value <> 0 Then
-            offre = Cells(currentRowOffre, 5).Value
-            currentRowTrack = 2
-            While Len(Cells(currentRowTrack, 6).Value) > 0
-                If Cells(currentRowTrack, 6).Value <> 0 Then
-
-                    track = Cells(currentRowTrack, 6).Value
-                    'MsgBox ("offre = " & offre)
-                    'MsgBox ("track = " & track)
-                    Sheets(currentYear).Select
-                    numb = 0
-                    currentRowHop = 2
-                    While Len(Cells(currentRowHop, 2).Value) > 0
-                        If Cells(currentRowHop, 1).Value = offre And Cells(currentRowHop, 2).Value = track Then
-                            numb = numb + Cells(currentRowHop, 3).Value
-                            
-                        End If
-                    
-                        currentRowHop = currentRowHop + 1
-                    Wend
-                
-                
-                
-                End If
-            Sheets("Result").Select
-            trackExist = "no"
-            i = 2
-            While Len(Cells(i, 1).Value) > 0
-                If Cells(i, 1).Value = offre And Cells(i, 2).Value = track Then
-                    trackExist = "yes"
-                    rowTrack = i
-                End If
-                i = i + 1
-            
-            
-            Wend
-            lastRow = i - 1
-            If numb > 0 Then
-                If trackExist = "yes" Then
-                    Cells(rowTrack, currentCol).Value = numb
-                    
-                Else
-                    Cells(lastRow + 1, 1).Value = offre
-                    Cells(lastRow + 1, 2).Value = track
-                
-                    Cells(lastRow + 1, currentCol).Value = numb
-                
-                End If
-            
-            End If
-            
-            
-            currentRowTrack = currentRowTrack + 1
-
-            Wend
-        End If
-        currentRowOffre = currentRowOffre + 1
-    
-    Wend
-    
+'
+    ActiveSheet.Shapes.AddTextbox(msoTextOrientationHorizontal, 81, 84.75, 237, _
+        88.5).Select
+    MsgBox (Selection.Name)
+    textBox1 = Selection.Name
+    Selection.ShapeRange(1).TextFrame2.TextRange.Characters.Text = "1"
+    Selection.ShapeRange(1).TextFrame2.TextRange.Characters(1, 1).ParagraphFormat. _
+        FirstLineIndent = 0
+    With Selection.ShapeRange(1).TextFrame2.TextRange.Characters(1, 1).Font
+        .NameComplexScript = "+mn-cs"
+        .NameFarEast = "+mn-ea"
+        .Fill.Visible = msoTrue
+        .Fill.ForeColor.ObjectThemeColor = msoThemeColorDark1
+        .Fill.ForeColor.TintAndShade = 0
+        .Fill.ForeColor.Brightness = 0
+        .Fill.Transparency = 0
+        .Fill.Solid
+        .Size = 11
+        .Name = "+mn-lt"
+    End With
 
 
-
-
-
-    currentCol = currentCol + 1
-Wend
+    ActiveSheet.Shapes.AddTextbox(msoTextOrientationHorizontal, 81 + 10, 84.75 + 10, 237 + 10, _
+        88.5 + 10).Select
+    MsgBox (Selection.Name)
+    textBox2 = Selection.Name
+    Selection.ShapeRange(1).TextFrame2.TextRange.Characters.Text = "1"
+    Selection.ShapeRange(1).TextFrame2.TextRange.Characters(1, 1).ParagraphFormat. _
+        FirstLineIndent = 0
+    With Selection.ShapeRange(1).TextFrame2.TextRange.Characters(1, 1).Font
+        .NameComplexScript = "+mn-cs"
+        .NameFarEast = "+mn-ea"
+        .Fill.Visible = msoTrue
+        .Fill.ForeColor.ObjectThemeColor = msoThemeColorDark1
+        .Fill.ForeColor.TintAndShade = 0
+        .Fill.ForeColor.Brightness = 0
+        .Fill.Transparency = 0
+        .Fill.Solid
+        .Size = 11
+        .Name = "+mn-lt"
+    End With
     
-    
-    
+    ActiveSheet.Shapes.Range(Array(textBox1, textBox2)).Select
     
 End Sub
