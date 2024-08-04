@@ -1,50 +1,90 @@
-Sub Macro2()
-'
-' Macro2 Macro
-'
+Sub validité_courses()
 
-'
-    ActiveSheet.Shapes.AddTextbox(msoTextOrientationHorizontal, 81, 84.75, 237, _
-        88.5).Select
-    MsgBox (Selection.Name)
-    textBox1 = Selection.Name
-    Selection.ShapeRange(1).TextFrame2.TextRange.Characters.Text = "1"
-    Selection.ShapeRange(1).TextFrame2.TextRange.Characters(1, 1).ParagraphFormat. _
-        FirstLineIndent = 0
-    With Selection.ShapeRange(1).TextFrame2.TextRange.Characters(1, 1).Font
-        .NameComplexScript = "+mn-cs"
-        .NameFarEast = "+mn-ea"
-        .Fill.Visible = msoTrue
-        .Fill.ForeColor.ObjectThemeColor = msoThemeColorDark1
-        .Fill.ForeColor.TintAndShade = 0
-        .Fill.ForeColor.Brightness = 0
-        .Fill.Transparency = 0
-        .Fill.Solid
-        .Size = 11
-        .Name = "+mn-lt"
-    End With
+Sheets("viriato_tout").Select
+
+currentRowViriato = 6
 
 
-    ActiveSheet.Shapes.AddTextbox(msoTextOrientationHorizontal, 81 + 10, 84.75 + 10, 237 + 10, _
-        88.5 + 10).Select
-    MsgBox (Selection.Name)
-    textBox2 = Selection.Name
-    Selection.ShapeRange(1).TextFrame2.TextRange.Characters.Text = "1"
-    Selection.ShapeRange(1).TextFrame2.TextRange.Characters(1, 1).ParagraphFormat. _
-        FirstLineIndent = 0
-    With Selection.ShapeRange(1).TextFrame2.TextRange.Characters(1, 1).Font
-        .NameComplexScript = "+mn-cs"
-        .NameFarEast = "+mn-ea"
-        .Fill.Visible = msoTrue
-        .Fill.ForeColor.ObjectThemeColor = msoThemeColorDark1
-        .Fill.ForeColor.TintAndShade = 0
-        .Fill.ForeColor.Brightness = 0
-        .Fill.Transparency = 0
-        .Fill.Solid
-        .Size = 11
-        .Name = "+mn-lt"
-    End With
+
+While Len(Cells(currentRowViriato, 1).Value) > 0
+
+    numCourse = Cells(currentRowViriato, 2).Value
+
+
     
-    ActiveSheet.Shapes.Range(Array(textBox1, textBox2)).Select
+    validityLeftId = Cells(currentRowViriato, 9).Value
+    depStationLeft = Cells(currentRowViriato, 3).Value
+    arrStationLeft = Cells(currentRowViriato, 4).Value
     
+    validityRightId = Cells(currentRowViriato, 12).Value
+    depStationRight = Cells(currentRowViriato, 13).Value
+    arrStationRight = Cells(currentRowViriato, 18).Value
+    
+    Sheets("operatingPeriod").Select
+    currentRowCalendrier = 2
+    While Len(Cells(currentRowCalendrier, 5).Value) > 0
+    
+        If Cells(currentRowCalendrier, 2).Value = validityLeftId Then
+            validityLeftDays = Cells(currentRowCalendrier, 2).Value
+        
+        End If
+        
+        If Cells(currentRowCalendrier, 2).Value = validityRightId Then
+            validityRightDays = Cells(currentRowCalendrier, 2).Value
+        
+        End If
+    
+        currentRowCalendrier = currentRowCalendrier + 1
+    Wend
+    
+    Sheets("courses_et_validité").Select
+    currentColValidity = 3
+    Cells(1, currentColValidity).Value = validityLeftId
+    Cells(2, currentColValidity).Value = numCourse
+    
+    
+    For i = 1 To 364
+        If CStr(Right(Left(validityLeftDays, i), 1)) = "1" Then
+            Cells(i + 2, currentColValidity).Value = depStationLeft & " - " & arrStationLeft
+            Cells(i + 2, currentColValidity).Interior.Color = RGB(0, 255, 0)
+        Else
+            Cells(i + 2, currentColValidity).Interior.Color = RGB(255, 0, 0)
+        
+        End If
+        
+        
+        
+     
+        
+    Next i
+    
+    If Len(validityRightId) > 0 Then
+    
+        Cells(1, currentColValidity).Value = validityLeftId & "/" & validityRightId
+        
+        
+        For i = 1 To 364
+            If CStr(Right(Left(validityRightDays, i), 1)) = "1" Then
+                Cells(i + 2, currentColValidity).Value = depStationRight & " - " & arrStationRight
+                Cells(i + 2, currentColValidity).Interior.Color = RGB(0, 180, 0)
+            End If
+            
+            
+            
+         
+            
+        Next i
+    
+    
+        currentColValidity = currentColValidity + 2
+    Else
+        currentColValidity = currentColValidity + 1
+    End If
+    
+    
+Sheets("viriato_tout").Select
+currentRowViriato = currentRowViriato + 1
+
+Wend
+
 End Sub
